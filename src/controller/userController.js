@@ -13,7 +13,7 @@ export const signUp = async (req, res) => {
 
     const user = await User.create({
       email,
-      password,
+      password: hashedPassword,
     });
 
     res.status(200).send({ message: "Success", data: user });
@@ -23,38 +23,24 @@ export const signUp = async (req, res) => {
 };
 
 export const signIn = async (req, res) => {
-  const { email, password } = req.body;
+  const { body } = req;
+  const { email, password } = body;
   try {
     const user = await User.findOne({ email });
 
     console.log("USER", user);
 
+    if (!user.length) {
+    }
     console.log("Body error", email, password);
 
     const isPasswordCorrect = bcrypt.compareSync(password, user.password);
 
     if (!isPasswordCorrect) {
-      res.status(403).send({ message: "Password is incorrect" });
-    } else {
-      res.status(200).send({ message: "Success", data: user });
-    }
+      return res.status(403).send({ message: "Password is incorrect" });
+    } else return res.status(200).send({ message: "Success", data: user });
   } catch (error) {
-    res.status(500).send({ message: "Server Error" });
+    console.log(error);
+    return res.status(500).send({ message: "Server Error" });
   }
 };
-
-/*const { body } = req;
-  const { email, password } = body;
-
-  const user = await User.findOne({ email });
-
-  console.log("USER", user);
-
-  console.log("Body error", email, password);
-
-  const isPasswordCorrect = bcrypt.compareSync(password, user.password);
-
-  if (!isPasswordCorrect) {
-    res.status(403).send({ message: "Password is incorrect" });
-  }
-  res.status(200).send({ message: "Success", data: user });*/
