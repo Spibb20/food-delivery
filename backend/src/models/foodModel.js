@@ -12,4 +12,4 @@ const foodSchema = new Schema(
   { timestamps: true }
 );
 
-export const Food = model("FoodCategory", foodSchema);
+export const Food = model("Food", foodSchema);
