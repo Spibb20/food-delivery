@@ -6,10 +6,10 @@ const userSchema = new Schema(
     password: { type: String, required: true },
     phoneNumber: { type: String },
     address: { type: String },
-    role: { type: String, enum: ["USER", "ADMIN"] },
-    orderedFoods: { type: [Schema.ObjectId] },
+    role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
+    orderedFoods: { type: Schema.Types.ObjectId, ref: "FoodOrder" },
     ttl: { type: Date },
-    isVerified: { type: Boolean },
+    isVerified: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
