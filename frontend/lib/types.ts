@@ -7,3 +7,8 @@ export type ButtonProps = {
   type?: "button" | "submit" | "reset";
   btnIcon: string;
 };
+
+export type adminState = {
+  onclickOrders?: () => void;
+  onclickFoodMenu?: () => void;
+};

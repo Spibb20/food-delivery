@@ -1,4 +1,3 @@
-import { AdminNavigation } from "./_components/AdminNavigation";
 import "./globals.css";
 
 export default function AdminLayout({
@@ -8,10 +7,7 @@ export default function AdminLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <AdminNavigation />
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

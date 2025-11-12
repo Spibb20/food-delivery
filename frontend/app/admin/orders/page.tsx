@@ -1,5 +1,9 @@
-import Image from "next/image";
+import { Orders } from "./_components/Orders";
 
-export default function AdminOrdersHome() {
-  return <div className="bg-teal-100"></div>;
+export default function AdminOrdersPage() {
+  return (
+    <div>
+      <Orders></Orders>
+    </div>
+  );
 }

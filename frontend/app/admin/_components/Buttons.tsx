@@ -15,7 +15,7 @@ export const Button = ({
     <button
       type={type}
       onClick={clickHandler}
-      className={`cursor-pointer rounded-md flex gap-2 h-[22px] active:bg-black active:text-white p-4 items-center  ${
+      className={`cursor-pointer rounded-md flex gap-2 h-[22px] border hover:bg-white p-4 items-center  ${
         color[btnFor as keyof typeof color] ?? ""
       }`}
     >
