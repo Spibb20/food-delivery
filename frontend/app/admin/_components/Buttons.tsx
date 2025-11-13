@@ -24,7 +24,6 @@ export const Button = ({
         src={btnIcon}
         height={22}
         width={22}
-        quality={100}
         className=" active:bg-white"
       ></Image>
       {children}
