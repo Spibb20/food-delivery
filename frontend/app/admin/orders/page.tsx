@@ -12,6 +12,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 
 export default function AdminOrdersPage() {
   const [page, setPage] = useState(1);
@@ -31,6 +32,15 @@ export default function AdminOrdersPage() {
     };
     fetchOrders();
   }, []);*/
+
+  /*useEffect(() => {
+    if (selectedOrders.length === Orders.length && Orders.length > 0) {
+      setSelectAll(true);
+    } else {
+      setSelectAll(false);
+    }
+  }, [selectedOrders  orders ])*/
+
   return (
     <div className="p-6">
       <h2 className="text-2xl font-semibold mb-4">Orders</h2>
@@ -39,6 +49,22 @@ export default function AdminOrdersPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>
+                <Input
+                  className="size-3 accent-black"
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setSelectAll(checked);
+                    if (checked) {
+                      //bugdiin songoh logic hiigdene selectedOrder state ashiglana
+                    } else {
+                      setSelectedOrders([]);
+                    }
+                  }}
+                />
+              </TableHead>
               <TableHead>№</TableHead>
               <TableHead>Customer</TableHead>
               <TableHead>Food</TableHead>
@@ -49,6 +75,20 @@ export default function AdminOrdersPage() {
           </TableHeader>
           <TableBody>
             <TableRow>
+              <TableCell>
+                <Input
+                  className="size-3 accent-black"
+                  type="checkbox"
+                  /*checked=selectedOrders*/ onChange={(e) => {
+                    const checked = e.target.checked;
+                    if (checked) {
+                      // setSelectedOrders hiine
+                    } else {
+                      //setSelectedOrders filter hiine
+                    }
+                  }}
+                />
+              </TableCell>
               <TableCell>1</TableCell>
               <TableCell>bb@gmail.com</TableCell>
               <TableCell>Ordered Foods</TableCell>
