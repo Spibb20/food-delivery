@@ -1,13 +1,15 @@
 import { Router } from "express";
 import {
+  createFood,
   deleteFood,
   getFood,
   updateFood,
 } from "../controller/foodController.js";
+import { requireAdmin } from "../middleware/auth.js";
 
-export const foodRouter = Router();
-
-foodRouter
-  .get("/", getFood)
-  .patch("/:foodID", updateFood)
-  .delete("/:foodID", deleteFood);
+const router = Router();
+router.get("/", getFood);
+router.post("/", requireAdmin, createFood);
+router.patch("/:id", requireAdmin, updateFood);
+router.delete("/:id", requireAdmin, deleteFood);
+export default router;

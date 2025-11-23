@@ -1,10 +1,11 @@
-import { Schema, model } from "mongoose";
+import mongoose from "mongoose";
 
-const foodCategorySchema = new Schema(
+const categorySchema = new mongoose.Schema(
   {
-    categoryName: { type: String },
+    category: { type: String, required: true, trim: true, unique: true },
   },
   { timestamps: true }
 );
 
-export const FoodCategory = model("FoodCategory", foodCategorySchema);
+export const FoodCategory =
+  mongoose.models.Category || mongoose.model("Category", categorySchema);

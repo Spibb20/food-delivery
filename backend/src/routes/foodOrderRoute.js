@@ -1,19 +1,20 @@
 import { Router } from "express";
-import { auth } from "../middleware/auth.js";
 import {
   createFoodOrder,
-  getAllFoodOrders,
-  getMyFoodOrders,
-  updateFoodOrderStatus,
   deleteFoodOrder,
+  getAllFoodOrders,
+  getFoodOrdersByUser,
+  updateFoodOrder,
 } from "../controller/foodOrderController.js";
-
-const orderRouter = Router();
-
-orderRouter.post("/", auth, createFoodOrder);
-orderRouter.get("/", auth, getAllFoodOrders);
-orderRouter.get("/my", auth, getMyFoodOrders);
-orderRouter.patch("/:foodOrderId", auth, updateFoodOrderStatus);
-orderRouter.delete("/:foodOrderId", auth, deleteFoodOrder);
-
-export default orderRouter;
+import {
+  requireAdmin,
+  requireSelfOrAdmin,
+  requireUser,
+} from "../middleware/auth.js";
+const router = Router();
+router.post("/", requireUser, createFoodOrder);
+router.get("/", requireAdmin, getAllFoodOrders);
+router.get("/user/:userId", requireSelfOrAdmin, getFoodOrdersByUser);
+router.patch("/:id", requireAdmin, updateFoodOrder);
+router.delete("/:id", requireAdmin, deleteFoodOrder);
+export default router;

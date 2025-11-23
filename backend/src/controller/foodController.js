@@ -1,42 +1,73 @@
+import { FoodCategory } from "../models/foodCategoryModel.js";
 import { Food } from "../models/foodModel.js";
 
-export const getFood = async (req, res) => {
-  try {
-    const foodID = req.params.id;
-    const food = await Food.findById(foodID);
-
-    res.status(200).send({ message: "Success!", data: food });
-  } catch (error) {
-    res.status(500).send({ message: "Server error" });
+function parseFood(body) {
+  return {
+    food: String(body.food || "").trim(),
+    price: Number(body.price),
+    image: String(body.image || "").trim(),
+    ingredients: String(body.ingredients || "").trim(),
+    category: body.category,
+  };
+}
+function validateFood(data) {
+  if (
+    !data.food ||
+    !data.image ||
+    !data.ingredients ||
+    !data.category ||
+    !Number.isFinite(data.price) ||
+    data.price < 0
+  ) {
+    return "food, price, image, ingredients and category are required";
   }
-};
-
-export const updateFood = async (req, res) => {
+}
+export async function getFood(_req, res, next) {
   try {
-    const foodID = req.params.id;
-
-    const updatedData = req.body;
-
-    const food = await Food.findByIdAndUpdate(foodID, updatedData);
-    res.status(200).send({ message: "Success!", data: food });
-  } catch (error) {
-    res.status(500).send({ message: "Error" });
+    return res.json(
+      await Food.find().populate("category").sort({ createdAt: -1 })
+    );
+  } catch (e) {
+    return next(e);
   }
-};
-
-export const deleteFood = async (req, res) => {
+}
+export async function createFood(req, res, next) {
   try {
-    const foodID = req.params.id;
-
-    const food = await Food.findByIdAndDelete(foodID);
-
-    if (!food) {
-      return res.status(404).send({ message: "Food not found" });
-    }
-
-    return res.status(200).send({ message: "Food deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting food", error);
-    return res.status(500).send({ message: "Server error", error });
+    const data = parseFood(req.body);
+    const error = validateFood(data);
+    if (error) return res.status(400).json({ message: error });
+    if (!(await FoodCategory.exists({ _id: data.category })))
+      return res.status(404).json({ message: "Category not found" });
+    const food = await Food.create(data);
+    await food.populate("category");
+    return res.status(201).json(food);
+  } catch (e) {
+    return next(e);
   }
-};
+}
+export async function updateFood(req, res, next) {
+  try {
+    const data = parseFood(req.body);
+    const error = validateFood(data);
+    if (error) return res.status(400).json({ message: error });
+    if (!(await FoodCategory.exists({ _id: data.category })))
+      return res.status(404).json({ message: "Category not found" });
+    const updated = await Food.findByIdAndUpdate(req.params.id, data, {
+      new: true,
+      runValidators: true,
+    }).populate("category");
+    if (!updated) return res.status(404).json({ message: "Food not found" });
+    return res.json(updated);
+  } catch (e) {
+    return next(e);
+  }
+}
+export async function deleteFood(req, res, next) {
+  try {
+    const deleted = await Food.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Food not found" });
+    return res.json({ message: "Food deleted", food: deleted });
+  } catch (e) {
+    return next(e);
+  }
+}

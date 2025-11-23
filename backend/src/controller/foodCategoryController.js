@@ -1,50 +1,54 @@
 import { FoodCategory } from "../models/foodCategoryModel.js";
+import { Food } from "../models/foodModel.js";
 
-export const createFoodCategory = async (req, res) => {
+export async function getFoodCategory(_req, res, next) {
   try {
-    const { body } = req;
-    const foodCategory = await FoodCategory.create(body);
-    res.status(200).send({ message: "Success!", data: foodCategory });
-  } catch (error) {
-    res.status(500).send({ message: "Error", data: null });
+    return res.json(await FoodCategory.find().sort({ createdAt: 1 }));
+  } catch (e) {
+    return next(e);
   }
-};
-
-export const getFoodCategory = async (req, res) => {
+}
+export async function createFoodCategory(req, res, next) {
   try {
-    const { body } = req;
-    const foodCategory = await FoodCategory.find(body);
-    res.status(200).send({ message: "Success!", data: foodCategory });
-  } catch (error) {
-    res.status(500).send({ message: "Error" });
+    const category = String(req.body.category || "").trim();
+    if (!category)
+      return res.status(400).json({ message: "Category name is required" });
+    return res.status(201).json(await FoodCategory.create({ category }));
+  } catch (e) {
+    if (e?.code === 11000)
+      return res.status(409).json({ message: "Category already exists" });
+    return next(e);
   }
-};
-
-export const updateFoodCategory = async (req, res) => {
+}
+export async function updateFoodCategory(req, res, next) {
   try {
-    const categoryID = req.params.id;
-
-    const updatedData = req.body;
-
-    const foodCategory = await FoodCategory.findByIdAndUpdate(
-      categoryID,
-      updatedData
+    const category = String(req.body.category || "").trim();
+    if (!category)
+      return res.status(400).json({ message: "Category name is required" });
+    const updated = await FoodCategory.findByIdAndUpdate(
+      req.params.id,
+      { category },
+      { new: true, runValidators: true }
     );
-    res.status(200).send({ message: "Success!", data: foodCategory });
-  } catch (error) {
-    res.status(500).send({ message: "Error" });
+    if (!updated)
+      return res.status(404).json({ message: "Category not found" });
+    return res.json(updated);
+  } catch (e) {
+    return next(e);
   }
-};
-
-export const deleteFoodCategory = async (req, res) => {
+}
+export async function deleteFoodCategory(req, res, next) {
   try {
-    const categoryID = req.params.id;
-
-    await FoodCategory.findByIdAndDelete(categoryID);
-
-    return res.status(200).send({ message: "Category deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting category", error);
-    return res.status(500).send({ message: "Server error", error });
+    const inUse = await Food.exists({ category: req.params.id });
+    if (inUse)
+      return res
+        .status(409)
+        .json({ message: "Delete or move foods in this category first" });
+    const deleted = await FoodCategory.findByIdAndDelete(req.params.id);
+    if (!deleted)
+      return res.status(404).json({ message: "Category not found" });
+    return res.json({ message: "Category deleted", category: deleted });
+  } catch (e) {
+    return next(e);
   }
-};
+}

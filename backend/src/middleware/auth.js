@@ -1,17 +1,46 @@
-import jwt from "jsonwebtoken";
+import { getAuth } from "@clerk/express";
 
-export const auth = (req, res, next) => {
-  const token = req.body.token || req.headers["authorization"];
+function getAdminIds() {
+  return new Set(
+    (process.env.ADMIN_USER_IDS || "")
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean)
+  );
+}
 
-  if (!token) return res.status(403).send({ message: "No token" });
+function authenticatedUser(req) {
+  const auth = getAuth(req);
+  return auth.isAuthenticated && auth.userId ? auth.userId : null;
+}
 
-  const BearerToken = token.split(" ")[1];
+export function requireUser(req, res, next) {
+  const userId = authenticatedUser(req);
+  if (!userId)
+    return res.status(401).json({ message: "Authentication required" });
+  req.authUserId = userId;
+  return next();
+}
 
-  try {
-    const decoded = jwt.verify(BearerToken, "secret-key");
-    req.user = decoded;
-    next();
-  } catch {
-    return res.status(401).send({ message: "Invalid token" });
+export function requireAdmin(req, res, next) {
+  const userId = authenticatedUser(req);
+  if (!userId)
+    return res.status(401).json({ message: "Authentication required" });
+  if (!getAdminIds().has(userId))
+    return res.status(403).json({ message: "Admin access required" });
+  req.authUserId = userId;
+  return next();
+}
+
+export function requireSelfOrAdmin(req, res, next) {
+  const userId = authenticatedUser(req);
+  if (!userId)
+    return res.status(401).json({ message: "Authentication required" });
+  if (userId !== req.params.userId && !getAdminIds().has(userId)) {
+    return res
+      .status(403)
+      .json({ message: "Not allowed to access these orders" });
   }
-};
+  req.authUserId = userId;
+  return next();
+}

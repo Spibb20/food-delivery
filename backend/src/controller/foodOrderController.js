@@ -1,83 +1,86 @@
+import { Food } from "../models/foodModel.js";
 import { FoodOrder } from "../models/foodOrderModel.js";
 
-export const createFoodOrder = async (req, res) => {
+export async function createFoodOrder(req, res, next) {
   try {
-    const userId = req.user.userId;
-    const { foodOrderItems } = req.body;
-
+    const incomingItems = Array.isArray(req.body.items) ? req.body.items : [];
+    const location = String(req.body.location || "").trim();
+    if (!incomingItems.length)
+      return res
+        .status(400)
+        .json({ message: "Order must contain at least one item" });
+    if (!location)
+      return res.status(400).json({ message: "Delivery location is required" });
+    const items = [];
     let totalPrice = 0;
-
-    for (const item of foodOrderItems) {
-      const food = await Food.findById(item.food);
-      if (!food) return res.status(404).send({ message: "Food not found" });
-
-      totalPrice += food.price * item.quantity;
+    for (const item of incomingItems) {
+      const food = await Food.findById(item.foodId);
+      if (!food) return res.status(404).json({ message: "Food not found" });
+      const howMuch = Math.max(1, Number.parseInt(item.howMuch, 10) || 1);
+      items.push({
+        foodId: food._id,
+        name: food.food,
+        price: food.price,
+        howMuch,
+        ingredients: food.ingredients,
+        note: item.note,
+      });
+      totalPrice += food.price * howMuch;
     }
-
-    const newOrder = await FoodOrder.create({
-      user: userId,
-      foodOrderItems,
+    const order = await FoodOrder.create({
+      user: req.authUserId,
+      items,
       totalPrice,
+      status: "pending",
+      location,
     });
-
-    res.status(201).send({ message: "Order created", data: newOrder });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ message: "Server error" });
+    await order.populate("items.foodId");
+    return res.status(201).json(order);
+  } catch (e) {
+    return next(e);
   }
-};
-
-export const getAllFoodOrders = async (req, res) => {
+}
+export async function getAllFoodOrders(_req, res, next) {
   try {
-    const orders = await FoodOrder.find()
-      .populate("user", "email phoneNumber")
-      .populate("foodOrderItems.food", "foodName price image");
-    res.status(200).send({ message: "Success", data: orders });
-  } catch (error) {
-    res.status(500).send({ message: error });
-  }
-};
-
-export const getMyFoodOrders = async (req, res) => {
-  try {
-    const userId = req.user.userId;
-
-    const orders = await FoodOrder.find({ user: userId }).populate(
-      "foodOrderItems.food",
-      "foodName price image"
+    return res.json(
+      await FoodOrder.find().populate("items.foodId").sort({ createdAt: -1 })
     );
-
-    res.status(200).send({ message: "Success", data: orders });
-  } catch {
-    res.status(500).send({ message: "Error" });
+  } catch (e) {
+    return next(e);
   }
-};
-
-export const updateFoodOrderStatus = async (req, res) => {
+}
+export async function getFoodOrdersByUser(req, res, next) {
   try {
-    const { foodOrderId } = req.params;
-    const { status } = req.body;
-
-    const order = await FoodOrder.findByIdAndUpdate(
-      foodOrderId,
-      { status },
-      { new: true }
+    return res.json(
+      await FoodOrder.find({ user: req.params.userId })
+        .populate("items.foodId")
+        .sort({ createdAt: -1 })
     );
-
-    res.status(200).send({ message: "Status updated", data: order });
-  } catch {
-    res.status(500).send({ message: "Error" });
+  } catch (e) {
+    return next(e);
   }
-};
-
-export const deleteFoodOrder = async (req, res) => {
+}
+export async function updateFoodOrder(req, res, next) {
   try {
-    const { foodOrderId } = req.params;
-
-    await FoodOrder.findByIdAndDelete(foodOrderId);
-
-    res.status(200).send({ message: "Order deleted" });
-  } catch {
-    res.status(500).send({ message: "Error" });
+    if (!["pending", "canceled", "delivered"].includes(req.body.status))
+      return res.status(400).json({ message: "Invalid order status" });
+    const updated = await FoodOrder.findByIdAndUpdate(
+      req.params.id,
+      { status: req.body.status },
+      { new: true, runValidators: true }
+    ).populate("items.foodId");
+    if (!updated) return res.status(404).json({ message: "Order not found" });
+    return res.json(updated);
+  } catch (e) {
+    return next(e);
   }
-};
+}
+export async function deleteFoodOrder(req, res, next) {
+  try {
+    const deleted = await FoodOrder.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Order not found" });
+    return res.json({ message: "Order deleted", order: deleted });
+  } catch (e) {
+    return next(e);
+  }
+}
