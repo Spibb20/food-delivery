@@ -133,7 +133,7 @@ export function PasswordLogin({
             </Button>
             <div className="flex gap-2 pl-23">
               <p className="text-gray-500">Already have an account?</p>
-              <Link href={"/SignUp"}>
+              <Link href={"/sign-in"}>
                 <span className="text-blue-500">Log in</span>
               </Link>
             </div>

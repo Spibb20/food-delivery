@@ -1,10 +1,6 @@
-import { Button } from "@/components/ui/button";
-// import { Dishes } from "./_components/Dishes.Left.side";
-
 import { User } from "@/components/user";
 import { Category } from "./_components/Category";
 import { Appetizers } from "./_components/Appetizers";
-
 
 export default function DishesHome() {
   return (

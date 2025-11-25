@@ -25,7 +25,7 @@ export function Navbar() {
     setLoggedIn(true);
   }
   return (
-    <div className="w-full h-[172px] bg-black flex justify-between  px-30 items-center">
+    <div className="flex min-h-[140px] w-full items-center justify-between bg-black px-10 lg:px-30">
       <div className="flex gap-5 ">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -79,7 +79,7 @@ export function Navbar() {
               <Input
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="Please share your complete address"
-                className="w-[454] h-20 pb-13"
+                className="h-20 w-[454px] pb-13"
               />
             </div>
 

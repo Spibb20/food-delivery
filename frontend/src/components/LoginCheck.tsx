@@ -32,10 +32,10 @@ export function CheckingUser() {
             </DialogHeader>
 
             <DialogFooter className="flex gap-5">
-              <Link href={"/client/login"}>
+              <Link href={"/sign-in"}>
                 <Button className="w-[182px]">Log in</Button>
               </Link>
-              <Link href={"/client/signUp"}>
+              <Link href={"/sign-up"}>
                 <Button variant="outline" className="w-[182px]" type="submit">
                   Sign up
                 </Button>

@@ -26,30 +26,44 @@ import { OrderedAlert } from "./orderedAlert";
 import { CheckingUser } from "./LoginCheck";
 import { api } from "@/lib/api";
 import { useOrder } from "@/context/food.provider";
-import { useUser } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 
 export function OrderDetail({ location }: { location: string }) {
   const { cart, clearCart, orderedFood, refreshOrders } = useOrder();
   const { user } = useUser();
+  const { getToken } = useAuth();
   const empty = cart.length === 0;
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showOrderAlert, setShowOrderAlert] = useState(false);
   const foodAlert = async () => {
-    if (!user || empty) return;
+    if (!user || empty || isSubmitting) return;
     if (!String(location || "").trim()) {
       alert("Please add a delivery location.");
       return;
     }
     try {
-      await api.post("/order", {
-        items: cart.map((item) => ({ foodId: item.foodId, howMuch: item.howMuch })),
-        location: String(location).trim(),
-      });
+      setIsSubmitting(true);
+      const token = await getToken();
+      await api.post(
+        "/order",
+        {
+          items: cart.map((item) => ({
+            foodId: item.foodId,
+            howMuch: item.howMuch,
+          })),
+          location: String(location).trim(),
+        },
+        { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
+      );
       clearCart();
       await refreshOrders();
       setShowOrderAlert(true);
       window.setTimeout(() => setShowOrderAlert(false), 3000);
     } catch (error) {
       console.error("Could not place order", error);
+      alert("Could not place order. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -81,7 +95,7 @@ export function OrderDetail({ location }: { location: string }) {
               </svg>
             </Button>
           </DialogTrigger>
-          <DialogContent className="w-[535px] h-full bg-gray-500 border-0 flex flex-col items-center right-0 left-200  ">
+          <DialogContent className=" overflow-scroll right-4 left-auto top-4 h-[calc(100vh-32px)] w-[calc(100vw-32px)] translate-x-0 translate-y-0 rounded-3xl border-0 bg-slate-600 p-4 shadow-2xl sm:max-w-[535px]">
             {showOrderAlert && (
               <Alert className="absolute top-10 right-220 w-[700px] h-[450px] flex  justify-center bg-black text-white">
                 <AlertTitle className="font-bold text-3xl">
@@ -166,7 +180,7 @@ export function OrderDetail({ location }: { location: string }) {
                       </CardTitle>
                     </CardHeader>
 
-                    <CardContent className="grid gap-6 h-[220px]">
+                    <CardContent className="grid gap-6 max-h-[380px] overflow-y-auto">
                       {empty === false && (
                         <div>
                           <div className="flex flex-col">
@@ -183,7 +197,7 @@ export function OrderDetail({ location }: { location: string }) {
                       )}
 
                       {empty && (
-                        <div className="w-[450px] rounded-2xl h-[182px] flex items-center justify-center flex-col bg-gray-300">
+                        <div className="w-full rounded-2xl h-[182px] flex items-center justify-center flex-col bg-gray-100">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="61"
@@ -219,11 +233,11 @@ export function OrderDetail({ location }: { location: string }) {
                     <div className="flex items-center justify-center">
                       <Button
                         type="button"
-                        disabled={empty}
+                        disabled={empty || isSubmitting}
                         onClick={foodAlert}
-                        className="bg-orange-500 text-white w-[439px] "
+                        className="bg-orange-500 text-white w-full"
                       >
-                        Checkout
+                        {isSubmitting ? "Ordering..." : "Checkout"}
                       </Button>
                     </div>
                   ) : (

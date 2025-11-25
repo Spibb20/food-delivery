@@ -1,5 +1,3 @@
-import Image from "next/image";
-import Dishes from "./(Admin)/admin/dishes/page";
 import { Hero } from "@/components/Hero";
 import { Navbar } from "@/components/Navbar";
 import { MappingFoods } from "@/components/MappingFoods";

@@ -58,50 +58,48 @@ export function MappingFoods() {
 
   return (
     <div>
-      <div className="flex flex-col w-full gap-10 px-10 py-10 bg-gray-700 ">
+      <div className="flex flex-col w-full gap-10 px-6 py-10 bg-gray-700">
         {categories.map((cat) => {
-          const dishForCat = dishes.filter(
-            (d) => d.category?._id === cat._id
-          );
+          const dishForCat = dishes.filter((d) => d.category?._id === cat._id);
           if (dishForCat.length === 0) return null;
 
           return (
             <section
               key={cat._id}
-              className="flex items-center justify-center flex-col"
+              className="mx-auto flex w-full max-w-[1264px] flex-col"
             >
               {showAlert && (
-                <Alert className="absolute top-10 w-[300px] bg-black text-white">
+                <Alert className="fixed top-6 left-1/2 z-50 w-[300px] -translate-x-1/2 rounded-2xl bg-black text-white">
                   <CheckCircle2Icon />
                   <AlertTitle>Food is being added to the cart!</AlertTitle>
                 </Alert>
               )}
-              <h1 className="text-3xl font-bold pr-295 mb-5 text-white">
+              <h1 className="mb-5 text-3xl font-bold text-white">
                 {cat.category}
               </h1>
-              <div className="flex flex-wrap gap-6 bg-gray-700 w-[1264px] rounded-2xl">
+              <div className="flex w-full flex-wrap gap-6 rounded-3xl bg-gray-700">
                 {dishForCat.map((dish, i) => (
                   <div
-                    key={i}
-                    className="bg-white  w-[397px] border-2 rounded-2xl h-[342px] pt-3 flex flex-col items-center justify-center gap-2  relative"
+                    key={dish._id}
+                    className="relative flex h-[342px] w-full max-w-[397px] flex-col items-center justify-center gap-2 rounded-3xl border border-gray-200 bg-white pt-3 shadow-sm"
                   >
                     <Dialog>
                       <DialogTrigger asChild>
                         <Image
                           src={dish.image}
                           alt={dish.ingredients}
-                          className="w-[360px] h-[210px]"
+                          className="h-[210px] w-[360px] rounded-2xl object-cover"
                           width={365}
                           height={210}
                           unoptimized
                         />
                       </DialogTrigger>
-                      <DialogContent className="h-[412px] w-[826px]  sm:max-w-[826px]  border-2 rounded-2xl">
+                      <DialogContent className="h-[412px] w-[826px] rounded-3xl border border-gray-200 sm:max-w-[826px]">
                         <div className="flex gap-7">
                           <Image
                             src={dish.image}
                             alt={dish.food}
-                            className="w-[377px] h-[300px]"
+                            className="h-[300px] w-[377px] rounded-2xl object-cover"
                             width={377}
                             height={364}
                             unoptimized
@@ -125,11 +123,11 @@ export function MappingFoods() {
                                 </div>
                                 <div className="flex gap-2 items-center">
                                   <Button
-                                    className="rounded-[50%] w-11 h-11 bg-white text-black border border-black"
+                                    className="h-11 w-11 rounded-full border border-black bg-white text-black"
                                     onClick={() =>
-                                      setOrderCount(orderCount - 1)
+                                      setOrderCount(Math.max(1, orderCount - 1))
                                     }
-                                    disabled={orderCount <= 0}
+                                    disabled={orderCount <= 1}
                                   >
                                     <svg
                                       width="16"
@@ -150,7 +148,7 @@ export function MappingFoods() {
                                     {orderCount}
                                   </h1>
                                   <Button
-                                    className="rounded-[50%] w-11 h-11 bg-white text-black border border-black"
+                                    className="h-11 w-11 rounded-full border border-black bg-white text-black"
                                     onClick={() =>
                                       setOrderCount(orderCount + 1)
                                     }
@@ -188,33 +186,40 @@ export function MappingFoods() {
                           </Button>
                         </DialogFooter>
                       </DialogContent>
-                    </Dialog>
 
-                    <Button
-                      variant={"secondary"}
-                      className="rounded-[50%] w-11 h-11 absolute  right-6 top-25"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                      >
-                        <path
-                          d="M8.00065 3.33325V12.6666M3.33398 7.99992H12.6673"
-                          stroke="#EF4444"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </Button>
-                    <div className="flex gap-25 items-center">
-                      <p className="text-orange-400 text-2xl">{dish.food}</p>
+                      <DialogTrigger asChild>
+                        <Button
+                          type="button"
+                          variant={"secondary"}
+                          className="absolute right-6 top-40 h-11 w-11 rounded-full bg-white text-black shadow-sm"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                          >
+                            <path
+                              d="M8.00065 3.33325V12.6666M3.33398 7.99992H12.6673"
+                              stroke="#EF4444"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </Button>
+                      </DialogTrigger>
+                    </Dialog>
+                    <div className="flex w-full items-center justify-between gap-4 px-4">
+                      <p className="line-clamp-1 text-orange-400 text-2xl">
+                        {dish.food}
+                      </p>
                       <span>${dish.price}</span>
                     </div>
-                    <p className="px-4  text-[12px]">{dish.ingredients}</p>
+                    <p className="px-4 text-[12px] line-clamp-2">
+                      {dish.ingredients}
+                    </p>
                   </div>
                 ))}
               </div>

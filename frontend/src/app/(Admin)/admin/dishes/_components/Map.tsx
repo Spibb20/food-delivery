@@ -71,7 +71,9 @@ export function ArrayMap() {
       const res = await api.post("/foods", body);
 
       setDishes((prev) => [...prev, res.data]);
-      setFood(""); setPrice(0); setIngredients("");
+      setFood("");
+      setPrice(0);
+      setIngredients("");
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.error("Could not add dish", error);
@@ -96,11 +98,11 @@ export function ArrayMap() {
               <div className="flex flex-wrap gap-6 bg-white rounded-2xl">
                 <Dialog>
                   <DialogTrigger asChild>
-                    <div className="bg-white border-dashed border-2 border-orange-400  rounded-2 w-[270px] h-[241px] flex flex-col items-center justify-center gap-5 ">
+                    <div className="bg-white border-dashed border-2 border-orange-400  rounded-2xl w-[270px] h-[241px] flex flex-col items-center justify-center gap-5 ">
                       <div className="flex flex-col items-center justify-center">
                         <Button
                           variant={"secondary"}
-                          className="bg-orange-400 flex flex-col rounded-[50%]"
+                          className="flex flex-col rounded-full bg-orange-400"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -162,7 +164,7 @@ export function ArrayMap() {
                         ref={fileInputRef}
                         placeholder="choose a file or drag & drop it here"
                       />
-                      <div className="bg-white w-[50px] h-[50px] rounded-[50%] absolute left-50 right-50 top-15 flex items-center justify-center">
+                      <div className="absolute left-1/2 top-1/2 flex h-[50px] w-[50px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white">
                         <svg
                           className=""
                           xmlns="http://www.w3.org/2000/svg"
@@ -188,10 +190,10 @@ export function ArrayMap() {
                 {dishForCat.map((dish) => (
                   <div
                     key={dish._id}
-                    className="bg-white  w-[270px] border-2 rounded-2xl h-[241px] pt-3 flex flex-col items-center justify-center gap-2  relative"
+                    className="relative flex h-[241px] w-[270px] flex-col items-center justify-center gap-2 rounded-3xl border border-gray-200 bg-white pt-3 shadow-sm"
                   >
                     <Image
-                      className="w-[239px] h-[150px]"
+                      className="h-[150px] w-[239px] rounded-2xl object-cover"
                       src={dish.image}
                       alt={dish.ingredients}
                       width={239}
